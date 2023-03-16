@@ -38,6 +38,7 @@ class EISProcedure(Procedure):
 
         self.lcrmeter.ac_voltage = self.voltage_rms/1000
         self.lcrmeter.bias_voltage = self.voltage_dcbias
+        self.lcrmeter.enable_hipower()
         
         number_of_decades = log10(self.freq_start) - log10(self.freq_end)
         number_of_points = int(number_of_decades) * self.points_per_decade
@@ -50,6 +51,7 @@ class EISProcedure(Procedure):
 
         self.lcrmeter.enable_bias()
 
+        i = 0
         for freq in self.meas_frequencies:
             self.lcrmeter.frequency = freq
             z, theta_deg = self.lcrmeter.impedance
@@ -63,7 +65,9 @@ class EISProcedure(Procedure):
                 'Im[Z] (ohm)': z * sin(theta_rad)
             }
             self.emit('results', data)
+            self.emit('progress', 100 * i / len(self.meas_frequencies))
 
+            i += 1
             sleep(0.5)
             if self.should_stop():
                 log.info("[EIS] User aborted the EIS procedure")
