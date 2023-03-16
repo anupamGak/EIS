@@ -21,11 +21,11 @@ class EISProcedure(Procedure):
 
     sample = Parameter('Sample ID')
 
-    freq_start = FloatParameter('Start Frequency', units='Hz')
-    freq_end = FloatParameter('End Frequency', units='Hz')
-    points_per_decade = IntegerParameter('Points per decade', units=None)
+    freq_start = FloatParameter('Start Frequency', units='Hz', default=100e3)
+    freq_end = FloatParameter('End Frequency', units='Hz', default=20)
+    points_per_decade = IntegerParameter('Points per decade', units=None, default=10)
 
-    voltage_rms = FloatParameter('E_ac rms', units='mV')
+    voltage_rms = FloatParameter('E_ac rms', units='mV', default=10)
     voltage_dcbias = FloatParameter('E_dc bias', units='V')
 
     DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (Ω)', 'Phase Angle (deg)', 'Re[Z] (Ω)', 'Im[Z] (Ω)']
@@ -76,15 +76,15 @@ class MainWindow(ManagedWindow):
     def __init__(self):
         super().__init__(
             procedure_class=EISProcedure,
-            inputs=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
-            displays=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
+            inputs=['sample', 'freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
+            displays=['sample', 'freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
             x_axis='Re[Z] (Ω)',
             y_axis='Im[Z] (Ω)',
             hide_groups=False,
             directory_input=True
         )
         self.setWindowTitle('Electrochemical Impedance Spectroscopy')
-        self.directory = r'D:/Anupam/EIS Data'
+        self.directory = r'C:/Users/16512/Desktop/Anupam/EIS Data'
 
     def queue(self):
 
@@ -95,7 +95,7 @@ class MainWindow(ManagedWindow):
         prefix = replace_placeholders(string=prefix, procedure=procedure)
         filename = unique_filename(directory, prefix=prefix)
 
-        title = "Electrochemical Impedance Spectroscopy -- Sample {Sample ID}"
+        title = "Electrochemical Impedance Spectroscopy -- Sample '{Sample ID}'"
         title = replace_placeholders(string=title, procedure=procedure)
         self.setWindowTitle(title)
 
