@@ -21,12 +21,12 @@ class EISProcedure(Procedure):
 
     sample = Parameter('Sample ID')
 
-    freq_start = FloatParameter('Starting Frequency', units='Hz')
-    freq_end = FloatParameter('Ending Frequency', units='Hz')
+    freq_start = FloatParameter('Start Frequency', units='Hz')
+    freq_end = FloatParameter('End Frequency', units='Hz')
     points_per_decade = IntegerParameter('Points per decade', units=None)
 
-    voltage_rms = FloatParameter('AC Voltage rms', units='mV')
-    ocv = FloatParameter('OCV', units='V')
+    voltage_rms = FloatParameter('E_ac rms', units='mV')
+    voltage_dcbias = FloatParameter('E_dc bias', units='V')
 
     DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (Ω)', 'Phase Angle (deg)', 'Re[Z] (Ω)', 'Im[Z] (Ω)']
 
@@ -37,11 +37,14 @@ class EISProcedure(Procedure):
         self.lcrmeter.trigger_source = "BUS"
 
         self.lcrmeter.ac_voltage = self.voltage_rms
-        self.lcrmeter.bias_voltage = self.ocv
+        self.lcrmeter.bias_voltage = self.voltage_dcbias
         
         number_of_decades = log10(self.freq_start) - log10(self.freq_end)
         number_of_points = int(number_of_decades) * self.points_per_decade
-        self.meas_frequencies = np.logspace(log10(self.freq_start), log10(self.freq_end), num=npoints, endpoint=True, base=10)
+        self.meas_frequencies = np.logspace(log10(self.freq_start), log10(self.freq_end),
+                                            num=npoints,
+                                            endpoint=True,
+                                            base=10)
 
     def execute(self):
 
@@ -50,16 +53,17 @@ class EISProcedure(Procedure):
         for freq in self.meas_frequencies:
             self.lcrmeter.frequency = freq
             z, theta_deg = self.lcrmeter.impedance
-            theta_rad = theta * pi / 180
+            theta_rad = theta_deg * pi / 180
 
             data = {
-            'Frequency (Hz)': freq,
-            'Impedance (Ω)': z,
-            'Phase Angle (deg)': theta_deg,
-            'Re[Z] (Ω)': z * cos(theta_rad),
-            'Im[Z] (Ω)': z * sin(theta_rad)
+                'Frequency (Hz)': freq,
+                'Impedance (Ω)': z,
+                'Phase Angle (deg)': theta_deg,
+                'Re[Z] (Ω)': z * cos(theta_rad),
+                'Im[Z] (Ω)': z * sin(theta_rad)
             }
             self.emit('results', data)
+
             sleep(0.5)
             if self.should_stop():
                 log.info("[EIS] User aborted the EIS procedure")
@@ -72,8 +76,8 @@ class MainWindow(ManagedWindow):
     def __init__(self):
         super().__init__(
             procedure_class=EISProcedure,
-            inputs=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'ocv'],
-            displays=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'ocv'],
+            inputs=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
+            displays=['freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
             x_axis='Re[Z] (Ω)',
             y_axis='Im[Z] (Ω)',
             hide_groups=False,
