@@ -4,7 +4,7 @@ log.addHandler(logging.NullHandler())
 
 import sys
 import random
-from math import pi, log10
+from math import pi, log10, cos, sin
 import numpy as np
 from time import sleep
 #from pymeasure.instruments.agilent import AgilentE4980
@@ -26,7 +26,7 @@ class EISProcedure(Procedure):
     points_per_decade = IntegerParameter('Points per decade', units=None, default=10)
 
     voltage_rms = FloatParameter('E_ac rms', units='mV', default=10)
-    voltage_dcbias = FloatParameter('E_dc bias', units='V')
+    voltage_dcbias = FloatParameter('E_dc bias', units='V', default=1.5)
 
     DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (ohm)', 'Phase Angle (deg)', 'Re[Z] (ohm)', 'Im[Z] (ohm)']
 
@@ -36,7 +36,7 @@ class EISProcedure(Procedure):
         self.lcrmeter.mode = "ZTD"
         self.lcrmeter.trigger_source = "BUS"
 
-        self.lcrmeter.ac_voltage = self.voltage_rms
+        self.lcrmeter.ac_voltage = self.voltage_rms/1000
         self.lcrmeter.bias_voltage = self.voltage_dcbias
         
         number_of_decades = log10(self.freq_start) - log10(self.freq_end)
@@ -56,7 +56,7 @@ class EISProcedure(Procedure):
             theta_rad = theta_deg * pi / 180
 
             data = {
-                'Frequency (Hz)': freq,
+                'Frequency (Hz)': self.lcrmeter.frequency,
                 'Impedance (ohm)': z,
                 'Phase Angle (deg)': theta_deg,
                 'Re[Z] (ohm)': z * cos(theta_rad),
