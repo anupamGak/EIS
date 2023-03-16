@@ -63,6 +63,7 @@ class EISProcedure(Procedure):
                 'Im[Z] (ohm)': z * sin(theta_rad)
             }
             self.emit('results', data)
+            self.emit('progress', 100 * i / len(self.meas_frequencies))
 
             sleep(0.5)
             if self.should_stop():
