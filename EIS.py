@@ -12,6 +12,7 @@ from hp4284a import HP4284A
 from pymeasure.log import console_log
 from pymeasure.display.Qt import QtWidgets
 from pymeasure.display.windows import ManagedWindow
+from pymeasure.display.widgets import PlotWidget
 from pymeasure.experiment import Procedure, Results, unique_filename, replace_placeholders
 from pymeasure.experiment import FloatParameter, Parameter, IntegerParameter
 
@@ -78,6 +79,8 @@ class MainWindow(ManagedWindow):
 
 
     def __init__(self):
+        plot2 = PlotWidget("Frequency Plot", EISProcedure.DATA_COLUMNS)
+        plot3 = PlotWidget("IDK Plot", EISProcedure.DATA_COLUMNS)
         super().__init__(
             procedure_class=EISProcedure,
             inputs=['sample', 'freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
@@ -85,7 +88,8 @@ class MainWindow(ManagedWindow):
             x_axis='Re[Z] (ohm)',
             y_axis='Im[Z] (ohm)',
             hide_groups=False,
-            directory_input=True
+            directory_input=True,
+            widget_list=(plot2,plot3)
         )
         self.setWindowTitle('Electrochemical Impedance Spectroscopy')
         self.directory = r'C:/Users/16512/Desktop/Anupam/EIS Data'
