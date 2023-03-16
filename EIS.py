@@ -28,7 +28,7 @@ class EISProcedure(Procedure):
     voltage_rms = FloatParameter('E_ac rms', units='mV', default=10)
     voltage_dcbias = FloatParameter('E_dc bias', units='V')
 
-    DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (Ω)', 'Phase Angle (deg)', 'Re[Z] (Ω)', 'Im[Z] (Ω)']
+    DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (ohm)', 'Phase Angle (deg)', 'Re[Z] (ohm)', 'Im[Z] (ohm)']
 
     def startup(self):
 
@@ -42,7 +42,7 @@ class EISProcedure(Procedure):
         number_of_decades = log10(self.freq_start) - log10(self.freq_end)
         number_of_points = int(number_of_decades) * self.points_per_decade
         self.meas_frequencies = np.logspace(log10(self.freq_start), log10(self.freq_end),
-                                            num=npoints,
+                                            num=number_of_points,
                                             endpoint=True,
                                             base=10)
 
@@ -57,10 +57,10 @@ class EISProcedure(Procedure):
 
             data = {
                 'Frequency (Hz)': freq,
-                'Impedance (Ω)': z,
+                'Impedance (ohm)': z,
                 'Phase Angle (deg)': theta_deg,
-                'Re[Z] (Ω)': z * cos(theta_rad),
-                'Im[Z] (Ω)': z * sin(theta_rad)
+                'Re[Z] (ohm)': z * cos(theta_rad),
+                'Im[Z] (ohm)': z * sin(theta_rad)
             }
             self.emit('results', data)
 
@@ -78,8 +78,8 @@ class MainWindow(ManagedWindow):
             procedure_class=EISProcedure,
             inputs=['sample', 'freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
             displays=['sample', 'freq_start', 'freq_end', 'points_per_decade', 'voltage_rms', 'voltage_dcbias'],
-            x_axis='Re[Z] (Ω)',
-            y_axis='Im[Z] (Ω)',
+            x_axis='Re[Z] (ohm)',
+            y_axis='Im[Z] (ohm)',
             hide_groups=False,
             directory_input=True
         )
