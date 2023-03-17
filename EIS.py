@@ -21,12 +21,12 @@ class EISProcedure(Procedure):
 
     sample = Parameter('Sample ID')
 
-    freq_start = FloatParameter('Start Frequency', units='Hz', default=100e3)
+    freq_start = FloatParameter('Start Frequency', units='Hz', default=10e3)
     freq_end = FloatParameter('End Frequency', units='Hz', default=20)
-    points_per_decade = IntegerParameter('Points per decade', units=None, default=10)
+    points_per_decade = IntegerParameter('Points per decade', units=None, default=20)
 
     voltage_rms = FloatParameter('E_ac rms', units='mV', default=10)
-    voltage_dcbias = FloatParameter('E_dc bias', units='V', default=1.5)
+    voltage_dcbias = FloatParameter('E_dc bias', units='V', default=1.6)
 
     DATA_COLUMNS = ['Frequency (Hz)', 'Impedance (ohm)', 'Phase Angle (deg)', 'Re[Z] (ohm)', 'Im[Z] (ohm)']
 
@@ -54,7 +54,7 @@ class EISProcedure(Procedure):
         i = 0
         for freq in self.meas_frequencies:
             self.lcrmeter.frequency = freq
-            z, theta_deg = self.lcrmeter.impedance
+            z, theta_deg = self.lcrmeter.make_measurement()
             theta_rad = theta_deg * pi / 180
 
             data = {

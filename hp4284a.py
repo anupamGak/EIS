@@ -1,6 +1,7 @@
 from pymeasure.instruments.agilent import AgilentE4980
 from pymeasure.instruments import Instrument
 from pymeasure.instruments.validators import strict_discrete_set, strict_range
+from pyvisa.errors import VisaIOError
 
 
 class HP4284A(AgilentE4980):
@@ -16,7 +17,7 @@ class HP4284A(AgilentE4980):
                                       validator=strict_range,
                                       values=[0, 60])
 
-    impedance = Instrument.measurement("TRIG:IMM;:FETC?",
+    impedance = Instrument.measurement("FETC?",
                                        "Measured data A and B, according to :attr:`~.AgilentE4980.mode`",
                                        get_process=lambda x: x[:2])
 
@@ -24,6 +25,18 @@ class HP4284A(AgilentE4980):
         super().__init__(adapter, **kwargs)
         self.timeout = 30000
         self.name = "Helwett-Packard 4284A LCR Meter"
+
+    def make_measurement(self):
+        """Trigger measurement --> wait --> Fetch data"""
+        self.write("TRIG:IMM")
+        while 1:
+            try:
+                a, b = self.impedance
+                break
+            except VisaIOError:
+                pass
+        return a, b
+
 
     def enable_bias(self):
         """Enables DC bias, either current or voltage"""
